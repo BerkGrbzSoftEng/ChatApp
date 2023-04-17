@@ -1,0 +1,481 @@
+﻿@{
+    ViewData["Title"] = "Login";
+    Layout = "~/Views/Shared/_LoginLayout.cshtml";
+}
+
+<!--begin::Login Sign in form-->
+<div class="login-signin">
+    <div class="mb-20">
+        <h3>Chat APP Hoşgeldiniz</h3>
+        <p class="opacity-60 font-weight-bold">Lütfen Bilgileri Doldurarak Giriş Yapınız:</p>
+    </div>
+    <form class="form" id="kt_login_signin_form">
+        <div class="form-group">
+            <input class="form-control h-auto text-white placeholder-white opacity-70 bg-dark-o-70 rounded-pill border-0 py-4 px-8 mb-5" type="text" placeholder="Kullanıcı Adınız" name="Username" autocomplete="off" />
+        </div>
+        <div class="form-group">
+            <input class="form-control h-auto text-white placeholder-white opacity-70 bg-dark-o-70 rounded-pill border-0 py-4 px-8 mb-5" type="password" placeholder="Sifreniz" name="Password" />
+        </div>
+        <div class="form-group d-flex flex-wrap justify-content-between align-items-center px-8">
+            <div class="checkbox-inline">
+                <label class="checkbox checkbox-outline checkbox-white text-white m-0">
+                    <input type="checkbox" name="remember" />
+                    <span></span>
+                    Beni Hatırla
+                </label>
+            </div>
+            <a href="javascript:;" id="kt_login_forgot" class="text-white font-weight-bold">Sifreni mi Unuttun ?</a>
+        </div>
+        <div class="form-group text-center mt-10">
+            <button id="kt_login_signin_submit" class="btn btn-pill btn-outline-white font-weight-bold opacity-90 px-15 py-3">Giris Yap</button>
+        </div>
+    </form>
+    <div class="mt-10">
+        <span class="opacity-70 mr-4">
+            Henuz bir hesabin yok mu?
+        </span>
+        <a href="javascript:;" id="kt_login_signup" class="text-white font-weight-bold">Kayit Ol</a>
+    </div>
+</div>
+<!--end::Login Sign in form-->
+<!--begin::Login Sign up form-->
+<div class="login-signup">
+    <div class="mb-20">
+        <h3>Sign Up</h3>
+        <p class="opacity-60">Enter your details to create your account</p>
+    </div>
+    <form class="form text-center" id="kt_login_signup_form">
+        <div class="form-group ">
+            <input class="form-control h-auto text-white placeholder-white opacity-70 bg-dark-o-70 rounded-pill border-0 py-4 px-8" type="text" placeholder="Ad" name="Name" />
+        </div>
+        <div class="form-group">
+            <input class="form-control h-auto text-white placeholder-white opacity-70 bg-dark-o-70 rounded-pill border-0 py-4 px-8" type="text" placeholder="Soyad" name="Surname" autocomplete="off" />
+        </div>
+        <div class="form-group">
+            <input class="form-control h-auto text-white placeholder-white opacity-70 bg-dark-o-70 rounded-pill border-0 py-4 px-8" type="text" placeholder="Kullanıcı Adı" name="Username" autocomplete="off" />
+        </div>
+        <div class="form-group">
+            <input class="form-control h-auto text-white placeholder-white opacity-70 bg-dark-o-70 rounded-pill border-0 py-4 px-8" type="password" placeholder="Sifre" name="Password" />
+        </div>
+        <div class="form-group">
+            <input class="form-control h-auto text-white placeholder-white opacity-70 bg-dark-o-70 rounded-pill border-0 py-4 px-8" type="password" placeholder="Sifre Onay" name="cpassword" />
+        </div>
+
+        <div class="form-group">
+            <button id="kt_login_signup_submit" class="btn btn-pill btn-outline-white font-weight-bold opacity-90 px-15 py-3 m-2">Kayit Ol</button>
+            <button id="kt_login_signup_cancel" class="btn btn-pill btn-outline-white font-weight-bold opacity-70 px-15 py-3 m-2">Vazgeç</button>
+        </div>
+    </form>
+</div>
+<!--end::Login Sign up form-->
+<!--begin::Login forgot password form-->
+<div class="login-forgot">
+    <div class="mb-20">
+        <h3>Forgotten Password ?</h3>
+        <p class="opacity-60">Enter your email to reset your password</p>
+    </div>
+    <form class="form" id="kt_login_forgot_form">
+        <div class="form-group mb-10">
+            <input class="form-control h-auto text-white placeholder-white opacity-70 bg-dark-o-70 rounded-pill border-0 py-4 px-8" type="text" placeholder="Email" name="email" autocomplete="off" />
+        </div>
+        <div class="form-group">
+            <button id="kt_login_forgot_submit" class="btn btn-pill btn-outline-white font-weight-bold opacity-90 px-15 py-3 m-2">Request</button>
+            <button id="kt_login_forgot_cancel" class="btn btn-pill btn-outline-white font-weight-bold opacity-70 px-15 py-3 m-2">Cancel</button>
+        </div>
+    </form>
+</div>
+<!--end::Login forgot password form-->
+@section js
+    {
+
+    <script>
+
+        toastr.options = {
+            "closeButton": false,
+            "debug": false,
+            "newestOnTop": true,
+            "progressBar": true,
+            "positionClass": "toast-bottom-right",
+            "preventDuplicates": false,
+            "onclick": null,
+            "showDuration": "300",
+            "hideDuration": "1000",
+            "timeOut": "5000",
+            "extendedTimeOut": "1000",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut"
+        };
+        var KTLogin = function () {
+            var _login;
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl("https://localhost:7187/chathub")
+                .build();
+            $(document).ready(() => {
+                connection.start();
+            });
+            var _showForm = function (form) {
+                var cls = 'login-' + form + '-on';
+                var form = 'kt_login_' + form + '_form';
+
+                _login.removeClass('login-forgot-on');
+                _login.removeClass('login-signin-on');
+                _login.removeClass('login-signup-on');
+
+                _login.addClass(cls);
+
+                KTUtil.animateClass(KTUtil.getById(form), 'animate__animated animate__backInUp');
+            }
+
+            var _handleSignInForm = function () {
+                var validation;
+
+                validation = FormValidation.formValidation(
+                    KTUtil.getById('kt_login_signin_form'),
+                    {
+                        fields: {
+                            Username: {
+                                validators: {
+                                    notEmpty: {
+                                        message: 'Kullanici Adi zorunludur!'
+                                    }
+                                }
+                            },
+                            Password: {
+                                validators: {
+                                    notEmpty: {
+                                        message: 'Sifre zorunludur!'
+                                    }
+                                }
+                            },
+
+                        },
+                        plugins: {
+                            trigger: new FormValidation.plugins.Trigger(),
+                            submitButton: new FormValidation.plugins.SubmitButton(),
+                            //defaultSubmit: new FormValidation.plugins.DefaultSubmit(), // Uncomment this line to enable normal button submit after form validation
+                            bootstrap: new FormValidation.plugins.Bootstrap()
+                        }
+                    }
+                );
+
+                $('#kt_login_signin_submit').on('click', function (e) {
+                    e.preventDefault();
+
+                    validation.validate().then(function (status) {
+                        if (status == 'Valid') {
+                            $.ajax({
+                                url: '@Url.Action("IsLogin")',
+                                type: 'POST',
+                                dataType: 'json',
+                                cache: false,
+                                data: new FormData(document.getElementById("kt_login_signin_form")),
+                                processData: false,
+                                contentType: false,
+                                beforeSend: function () {
+                                    KTApp.blockPage({
+                                        overlayColor: '#000000',
+                                        state: 'danger',
+                                        message: 'Lütfen Bekleyin...'
+                                    });
+
+                                    setTimeout(function () {
+                                        KTApp.unblockPage();
+                                    },
+                                        2500);
+                                },
+                                success: function (data) {
+
+                                    if (data.result === true) {
+                                       Swal.fire({
+                                            position: 'center',
+                                            icon: 'success',
+                                            title: data.header,
+                                            showConfirmButton: true,
+                                            text: data.message,
+                                            customClass: {
+                                                confirmButton: 'btn btn-primary'
+                                            },
+                                            buttonsStyling: true
+                                        });
+                                        setTimeout(function () {
+                                            window.location.href = '/Chat/ChatPage';
+                                        },
+                                            3500);
+                                    } else {
+                                        Swal.fire({
+                                            position: 'center',
+                                            icon: 'error',
+                                            title: data.Header,
+                                            showConfirmButton: true,
+                                            text: data.Message,
+                                            customClass: {
+                                                confirmButton: 'btn btn-primary'
+                                            },
+                                            buttonsStyling: true
+                                        });
+                                    }
+                                },
+                                error: function (data) {
+                                    Swal.fire({
+                                        position: 'center',
+                                        icon: 'error',
+                                        title: 'Beklenmedik Hata!',
+                                        text: data.Message,
+                                        showConfirmButton: false,
+                                        timer: 1500,
+                                        customClass: {
+                                            confirmButton: 'btn btn-primary'
+                                        },
+                                        buttonsStyling: false
+                                    });
+
+                                }
+                            });
+                            KTUtil.scrollTop();
+                        } else {
+                            swal.fire({
+                                text: "Hatali Giris Yaptiniz! Lutfen Tekrar Deneyiniz",
+                                icon: "error",
+                                buttonsStyling: false,
+                                confirmButtonText: "Tamam!",
+                                customClass: {
+                                    confirmButton: "btn font-weight-bold btn-light-primary"
+                                }
+                            }).then(function () {
+                                KTUtil.scrollTop();
+                            });
+                        }
+                    });
+                });
+
+
+                // Handle signup
+                $('#kt_login_signup').on('click', function (e) {
+                    e.preventDefault();
+                    _showForm('signup');
+                });
+            }
+
+            var _handleSignUpForm = function (e) {
+                var validation;
+                var form = KTUtil.getById('kt_login_signup_form');
+
+                validation = FormValidation.formValidation(
+                    form,
+                    {
+                        fields: {
+                            Name: {
+                                validators: {
+                                    notEmpty: {
+                                        message: 'Ad zorunludur!'
+                                    }
+                                }
+                            },
+                            Surname: {
+                                validators: {
+                                    notEmpty: {
+                                        message: 'Soyad zorunludur!'
+                                    }
+                                }
+                            },
+                            Username: {
+                                validators: {
+                                    notEmpty: {
+                                        message: 'Kullanıcı Adı zorunludur!'
+                                    }
+                                }
+                            },
+                            Password: {
+                                validators: {
+                                    notEmpty: {
+                                        message: 'Sifre zorunludur'
+                                    }
+                                }
+                            },
+                            cpassword: {
+                                validators: {
+                                    notEmpty: {
+                                        message: 'The password confirmation is required'
+                                    },
+                                    identical: {
+                                        compare: function () {
+                                            return form.querySelector('[name="Password"]').value;
+                                        },
+                                        message: 'Sifreler Eslesmiyor'
+                                    }
+                                }
+                            },
+
+                        },
+                        plugins: {
+                            trigger: new FormValidation.plugins.Trigger(),
+                            bootstrap: new FormValidation.plugins.Bootstrap()
+                        }
+                    }
+                );
+
+                $('#kt_login_signup_submit').on('click', function (e) {
+                    e.preventDefault();
+
+                    validation.validate().then(function (status) {
+
+                        if (status == 'Valid') {
+                            $.ajax({
+                                url: '@Url.Action("Register")',
+                                type: 'POST',
+                                dataType: 'json',
+                                cache: false,
+                                data: new FormData(document.getElementById("kt_login_signup_form")),
+                                processData: false,
+                                contentType: false,
+                                beforeSend: function () {
+                                    KTApp.blockPage({
+                                        overlayColor: '#000000',
+                                        state: 'danger',
+                                        message: 'Lütfen Bekleyin...'
+                                    });
+
+                                    setTimeout(function () {
+                                        KTApp.unblockPage();
+                                    },
+                                        2500);
+                                },
+                                success: function (data) {
+                                    if (data.result === true) {
+                                        toastr.success(data.Message, data.Header);
+                                        setTimeout(function () {
+                                            window.location.href = '@Url.Action("Login")';
+                                        },
+                                            3500);
+                                    } else {
+                                        Swal.fire({
+                                            position: 'center',
+                                            icon: 'error',
+                                            title: data.Header,
+                                            showConfirmButton: true,
+                                            text: data.Message,
+                                            customClass: {
+                                                confirmButton: 'btn btn-primary'
+                                            },
+                                            buttonsStyling: true
+                                        });
+                                    }
+                                },
+                                error: function (data) {
+                                    Swal.fire({
+                                        position: 'center',
+                                        icon: 'error',
+                                        title: 'Beklenmedik Hata!',
+                                        text: data.Message,
+                                        showConfirmButton: false,
+                                        timer: 1500,
+                                        customClass: {
+                                            confirmButton: 'btn btn-primary'
+                                        },
+                                        buttonsStyling: false
+                                    });
+
+                                }
+                            });
+                        } else {
+                            swal.fire({
+                                text: "Sorry, looks like there are some errors detected, please try again.",
+                                icon: "error",
+                                buttonsStyling: false,
+                                confirmButtonText: "Ok, got it!",
+                                customClass: {
+                                    confirmButton: "btn font-weight-bold btn-light-primary"
+                                }
+                            }).then(function () {
+                                KTUtil.scrollTop();
+                            });
+                        }
+                    });
+                });
+
+                // Handle cancel button
+                $('#kt_login_signup_cancel').on('click', function (e) {
+                    e.preventDefault();
+
+                    _showForm('signin');
+                });
+            }
+
+            var _handleForgotForm = function (e) {
+                var validation;
+
+                validation = FormValidation.formValidation(
+                    KTUtil.getById('kt_login_forgot_form'),
+                    {
+                        fields: {
+                            email: {
+                                validators: {
+                                    notEmpty: {
+                                        message: 'Email address is required'
+                                    },
+                                    emailAddress: {
+                                        message: 'The value is not a valid email address'
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            trigger: new FormValidation.plugins.Trigger(),
+                            bootstrap: new FormValidation.plugins.Bootstrap()
+                        }
+                    }
+                );
+
+                // Handle submit button
+                $('#kt_login_forgot_submit').on('click', function (e) {
+                    e.preventDefault();
+
+                    validation.validate().then(function (status) {
+                        if (status == 'Valid') {
+                            // Submit form
+                            KTUtil.scrollTop();
+                        } else {
+                            swal.fire({
+                                text: "Sorry, looks like there are some errors detected, please try again.",
+                                icon: "error",
+                                buttonsStyling: false,
+                                confirmButtonText: "Ok, got it!",
+                                customClass: {
+                                    confirmButton: "btn font-weight-bold btn-light-primary"
+                                }
+                            }).then(function () {
+                                KTUtil.scrollTop();
+                            });
+                        }
+                    });
+                });
+
+                // Handle cancel button
+                $('#kt_login_forgot_cancel').on('click', function (e) {
+                    e.preventDefault();
+
+                    _showForm('signin');
+                });
+            }
+
+            return {
+                init: function () {
+                    _login = $('#kt_login');
+
+                    _handleSignInForm();
+                    _handleSignUpForm();
+                    _handleForgotForm();
+                }
+            };
+        }();
+
+        jQuery(document).ready(function () {
+            KTLogin.init();
+        });
+
+
+
+    </script>
+}
